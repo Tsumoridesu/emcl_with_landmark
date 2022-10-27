@@ -13,6 +13,8 @@ namespace emcl {
 ExpResetMcl::ExpResetMcl(const Pose &p, int num, const Scan &scan,
 				const std::shared_ptr<OdomModel> &odom_model,
 				const std::shared_ptr<LikelihoodFieldMap> &map,
+                const yolov5_pytorch_ros::BoundingBoxes& bbox,
+                const YAML::Node& landmark_config,
 				double alpha_th, double open_space_th,
 				double expansion_radius_position, double expansion_radius_orientation)
 	: alpha_threshold_(alpha_th), open_space_threshold_(open_space_th),
@@ -25,7 +27,7 @@ ExpResetMcl::~ExpResetMcl()
 {
 }
 
-void ExpResetMcl::sensorUpdate(double lidar_x, double lidar_y, double lidar_t, bool inv)
+void ExpResetMcl::sensorUpdate(double lidar_x, double lidar_y, double lidar_t, bool inv, yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::Node& landmark_config)
 {
 	if(processed_seq_ == scan_.seq_)
 		return;
@@ -59,17 +61,20 @@ void ExpResetMcl::sensorUpdate(double lidar_x, double lidar_y, double lidar_t, b
 	if(valid_beams == 0)
 		return;
 
-	for(auto &p : particles_)
-		p.w_ *= p.likelihood(map_.get(), scan);
-
+	for(auto &p : particles_) {
+        p.w_ *= p.likelihood(map_.get(), scan);
+        p.w_ += p.vision_weight(bbox,landmark_config)*0.5;
+    }
 	alpha_ = normalizeBelief()/valid_beams;
 	//alpha_ = nonPenetrationRate( particles_.size() / 20, map_.get(), scan); //new version
 	ROS_INFO("ALPHA: %f / %f", alpha_, alpha_threshold_);
-	if(alpha_ < alpha_threshold_ and valid_pct > open_space_threshold_){
-		ROS_INFO("RESET");
-		expansionReset();
-		for(auto &p : particles_)
-			p.w_ *= p.likelihood(map_.get(), scan);
+	if(alpha_ < alpha_threshold_ and valid_pct > open_space_threshold_) {
+        ROS_INFO("RESET");
+        expansionReset();
+        for (auto &p: particles_){
+            p.w_ *= p.likelihood(map_.get(), scan);
+            p.w_ += p.vision_weight(bbox,landmark_config)*0.5;
+        }
 	}
 
 	if(normalizeBelief() > 0.000001)

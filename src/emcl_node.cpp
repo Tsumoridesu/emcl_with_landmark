@@ -9,7 +9,7 @@
 #include "geometry_msgs/PoseArray.h"
 #include "nav_msgs/GetMap.h"
 #include "std_msgs/Float32.h"
-
+#include "yaml-cpp/yaml.h"
 namespace emcl {
 
 EMclNode::EMclNode() : private_nh_("~")
@@ -34,7 +34,7 @@ void EMclNode::initCommunication(void)
 	alpha_pub_ = nh_.advertise<std_msgs::Float32>("alpha", 2, true);
 	laser_scan_sub_ = nh_.subscribe("scan", 2, &EMclNode::cbScan, this);
 	initial_pose_sub_ = nh_.subscribe("initialpose", 2, &EMclNode::initialPoseReceived, this);
-
+    yolo_sub = nh_.subscribe("detected_objects_in_image", 1, &EMclNode::yoloReceived, this);
 	global_loc_srv_ = nh_.advertiseService("global_localization", &EMclNode::cbSimpleReset, this);
 
 	private_nh_.param("global_frame_id", global_frame_id_, std::string("map"));
@@ -42,6 +42,9 @@ void EMclNode::initCommunication(void)
 	private_nh_.param("odom_frame_id", odom_frame_id_, std::string("odom"));
 	private_nh_.param("base_frame_id", base_frame_id_, std::string("base_link"));
 
+    private_nh_.param("landmark_file_path", landmark_file_path_, std::string("../landmarks.yaml"));
+
+    landmark_config_ = YAML::LoadFile(landmark_file_path_);
 	tfb_.reset(new tf2_ros::TransformBroadcaster());
 	tf_.reset(new tf2_ros::Buffer());
 	tfl_.reset(new tf2_ros::TransformListener(*tf_));
@@ -65,13 +68,14 @@ void EMclNode::initPF(void)
 	int num_particles;
 	double alpha_th, open_space_th;
 	double ex_rad_pos, ex_rad_ori;
+    yolov5_pytorch_ros::BoundingBoxes bbox;
 	private_nh_.param("num_particles", num_particles, 0);
 	private_nh_.param("alpha_threshold", alpha_th, 0.0);
 	private_nh_.param("open_space_threshold", open_space_th, 0.05);
 	private_nh_.param("expansion_radius_position", ex_rad_pos, 0.1);
 	private_nh_.param("expansion_radius_orientation", ex_rad_ori, 0.2);
 
-	pf_.reset(new ExpResetMcl(init_pose, num_particles, scan, om, map,
+	pf_.reset(new ExpResetMcl(init_pose, num_particles, scan, om, map,bbox,landmark_config_,
 				alpha_th, open_space_th, ex_rad_pos, ex_rad_ori));
 }
 
@@ -119,6 +123,12 @@ void EMclNode::initialPoseReceived(const geometry_msgs::PoseWithCovarianceStampe
 	init_t_ = tf2::getYaw(msg->pose.pose.orientation);
 }
 
+void EMclNode::yoloReceived(const yolov5_pytorch_ros::BoundingBoxes &msg)
+{
+    bbox_= msg;
+
+}
+
 void EMclNode::loop(void)
 {
 	if(init_request_){
@@ -148,7 +158,7 @@ void EMclNode::loop(void)
 	struct timespec ts_start, ts_end;
 	clock_gettime(CLOCK_REALTIME, &ts_start);
 	*/
-	pf_->sensorUpdate(lx, ly, lt, inv);
+	pf_->sensorUpdate(lx, ly, lt, inv, bbox_,landmark_config_);
 	/*
 	clock_gettime(CLOCK_REALTIME, &ts_end);
 	struct tm tm;

@@ -4,7 +4,9 @@
 
 #include "emcl/Particle.h"
 #include "emcl/Mcl.h"
+
 #include <cmath>
+#include <vector>
 
 namespace emcl {
 
@@ -14,6 +16,65 @@ Particle::Particle(double x, double y, double t, double w) : p_(x, y, t)
 {
 	w_ = w;
 }
+
+double Particle::vision_weight(yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::Node &landmark_config)
+{
+    double vision_weight_ = 0;
+    for(auto &b:bbox.bounding_boxes){
+        double theta_best = M_PI;
+        for(YAML::const_iterator Observed = landmark_config["landmark"][b.Class].begin(); Observed != landmark_config["landmark"][b.Class].end(); ++Observed){
+            auto Ol_x = Observed->second["pose"][0].as<double>();
+            auto Ol_y = Observed->second["pose"][1].as<double>();
+            if((p_.x_ - Ol_x)*(p_.x_ - Ol_x) + ((p_.y_ - Ol_y))*(p_.y_ - Ol_y) <= 100){
+                double phi = atan2(Ol_y - p_.y_, Ol_x - p_.x_) + p_.t_;
+                double theta = std::abs(phi - b.yaw);
+                if(theta > M_PI){
+                    theta = 2*M_PI - theta;
+                }
+                if(theta <= 1) {
+                    if (theta < theta_best) {
+                        theta_best = theta;
+                    }
+                    else{
+                        break;
+                    }
+                }
+            }
+
+        }
+        auto weigth = cos(theta_best)+1;
+        vision_weight_ += weigth;
+    }
+    if(bbox.bounding_boxes.size() != 0){
+        vision_weight_ /= bbox.bounding_boxes.size();
+    }
+    else{
+        vision_weight_ = 0;
+    }
+    return vision_weight_;
+
+//    for(auto &b:bbox.bounding_boxes)
+//    {
+//        if(b.Class == "Vending machine"){
+//            double phi_best = M_1_PI;
+//            double phi = atan2(-7 - p_.y_, 4 - p_.x_) + p_.t_;
+//            if (phi > 2 * M_PI){
+//                phi -= 2 * M_PI;
+//            }
+//            else if(phi > 2 * M_PI){
+//                phi += 2 * M_PI;
+//            }
+//
+//            double theta = phi - b.yaw;
+//            vision_weight_ = ((cos(theta) + 1) * b.probability)*0.5;
+//       }
+//        else{
+//            vision_weight_ = 0;
+//        }
+//   }
+//    return vision_weight_;
+}
+
 
 double Particle::likelihood(LikelihoodFieldMap *map, Scan &scan)
 {
