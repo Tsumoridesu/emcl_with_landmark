@@ -39,11 +39,13 @@ private:
 
 	ros::ServiceServer global_loc_srv_;
 
+    ros::Subscriber yolo_sub;
 	std::string footprint_frame_id_;
 	std::string global_frame_id_;
 	std::string odom_frame_id_;
 	std::string scan_frame_id_;
 	std::string base_frame_id_;
+    std::string landmark_file_path_;
 
 	std::shared_ptr<tf2_ros::TransformBroadcaster> tfb_;
 	std::shared_ptr<tf2_ros::TransformListener> tfl_;
@@ -56,6 +58,8 @@ private:
 	bool simple_reset_request_;
 	double init_x_, init_y_, init_t_;
 
+    yolov5_pytorch_ros::BoundingBoxes bbox_;
+    YAML::Node landmark_config_;
 	void publishPose(double x, double y, double t,
 			double x_dev, double y_dev, double t_dev,
 			double xy_cov, double yt_cov, double tx_cov);
@@ -73,6 +77,7 @@ private:
 	void cbScan(const sensor_msgs::LaserScan::ConstPtr &msg);
 	bool cbSimpleReset(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
 	void initialPoseReceived(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg);
+    void yoloReceived(const yolov5_pytorch_ros::BoundingBoxes &msg);
 };
 
 }

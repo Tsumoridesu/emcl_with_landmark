@@ -14,11 +14,14 @@ public:
 	ExpResetMcl(const Pose &p, int num, const Scan &scan,
 			const std::shared_ptr<OdomModel> &odom_model,
 			const std::shared_ptr<LikelihoodFieldMap> &map,
+            const yolov5_pytorch_ros::BoundingBoxes& bbox,
+            const YAML::Node& landmark_config,
 			double alpha_th, double open_space_th,
 			double expansion_radius_position, double expansion_radius_orientation);
 	~ExpResetMcl();
 
-	void sensorUpdate(double lidar_x, double lidar_y, double lidar_t, bool inv);
+	void sensorUpdate(double lidar_x, double lidar_y, double lidar_t, bool inv, yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::Node& landmark_config);
+//    void sensorReset(double lidar_x, double lidar_y, double lidar_t, bool inv, yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::Node& landmark_config);
 private:
 	double alpha_threshold_;
 	double open_space_threshold_;
