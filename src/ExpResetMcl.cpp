@@ -63,7 +63,10 @@ void ExpResetMcl::sensorUpdate(double lidar_x, double lidar_y, double lidar_t, b
 
 	for(auto &p : particles_) {
         p.w_ *= p.likelihood(map_.get(), scan);
-        p.w_ += p.vision_weight(bbox,landmark_config)*0.5;
+//        auto w_v = p.vision_weight(bbox, landmark_config);
+//        if(bbox.bounding_boxes.size() > 0){
+//            p.w_ *= w_v;
+//        }
     }
 	alpha_ = normalizeBelief()/valid_beams;
 	//alpha_ = nonPenetrationRate( particles_.size() / 20, map_.get(), scan); //new version
@@ -73,7 +76,10 @@ void ExpResetMcl::sensorUpdate(double lidar_x, double lidar_y, double lidar_t, b
         expansionReset();
         for (auto &p: particles_){
             p.w_ *= p.likelihood(map_.get(), scan);
-            p.w_ += p.vision_weight(bbox,landmark_config)*0.5;
+            auto w_v = p.vision_weight(bbox, landmark_config);
+            if(bbox.bounding_boxes.size() > 0){
+                p.w_ *= w_v;
+            }
         }
 	}
 
@@ -97,5 +103,13 @@ void ExpResetMcl::expansionReset(void)
 		p.w_ = 1.0/particles_.size();
 	}
 }
-
+//void ExpResetMcl::sensorReset(double lidar_x, double lidar_y, double lidar_t, bool inv,
+//                              yolov5_pytorch_ros::BoundingBoxes &bbox, YAML::Node &landmark_config)
+//{
+//    for(auto &p : particles_)
+//        if (((double)rand()/RAND_MAX) < 0.2)
+//        {
+//
+//        }
+//}
 }
