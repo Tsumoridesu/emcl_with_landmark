@@ -74,6 +74,7 @@ void ExpResetMcl::sensorUpdate(double lidar_x, double lidar_y, double lidar_t, b
 	if(alpha_ < alpha_threshold_ and valid_pct > open_space_threshold_) {
         ROS_INFO("RESET");
         expansionReset();
+//        vision_sensorReset(bbox, landmark_config);
         for (auto &p: particles_){
             p.w_ *= p.likelihood(map_.get(), scan);
             auto w_v = p.vision_weight(bbox, landmark_config);
@@ -103,13 +104,21 @@ void ExpResetMcl::expansionReset(void)
 		p.w_ = 1.0/particles_.size();
 	}
 }
-//void ExpResetMcl::sensorReset(double lidar_x, double lidar_y, double lidar_t, bool inv,
-//                              yolov5_pytorch_ros::BoundingBoxes &bbox, YAML::Node &landmark_config)
-//{
-//    for(auto &p : particles_)
-//        if (((double)rand()/RAND_MAX) < 0.2)
-//        {
-//
+
+
+//void ExpResetMcl::vision_sensorReset(yolov5_pytorch_ros::BoundingBoxes &bbox, YAML::Node &landmark_config) {
+//    if (bbox.bounding_boxes.size() != 0) {
+//        for (auto &p: particles_) {
+//            if ((double) rand() / RAND_MAX < 0.1) {
+//                auto b_ = bbox.bounding_boxes[rand() % (bbox.bounding_boxes.size() - 1)];
+//                auto l_ = landmark_config["landmark"][b_.Class][rand() %
+//                                                                (landmark_config["landmark"][b_.Class].size() - 1)];
+//                p.p_.x_ = l_["x"].as<double>() + (double) rand() / RAND_MAX * 5;
+//                p.p_.y_ = l_["y"].as<double>() + (double) rand() / RAND_MAX * 5;
+//                p.p_.t_ = (double) rand() / RAND_MAX * 2 * M_PI;
+//                p.w_ = 1.0 / particles_.size();
+//                }
+//            }
 //        }
-//}
+//    }
 }

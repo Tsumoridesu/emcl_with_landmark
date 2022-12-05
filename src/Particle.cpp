@@ -37,6 +37,9 @@ double Particle::vision_weight(yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::No
                     }
                 }
             }
+//            else{
+//                continue;
+//            }
 
         }
         auto weigth = cos(theta_best)+1;
@@ -49,49 +52,34 @@ double Particle::vision_weight(yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::No
         vision_weight_ = 0;
     }
     return vision_weight_;
-
-//    for(auto &b:bbox.bounding_boxes)
-//    {
-//        if(b.Class == "Vending machine"){
-//            double phi_best = M_1_PI;
-//            double phi = atan2(-7 - p_.y_, 4 - p_.x_) + p_.t_;
-//            if (phi > 2 * M_PI){
-//                phi -= 2 * M_PI;
-//            }
-//            else if(phi > 2 * M_PI){
-//                phi += 2 * M_PI;
-//            }
-//
-//            double theta = phi - b.yaw;
-//            vision_weight_ = ((cos(theta) + 1) * b.probability)*0.5;
-//       }
-//        else{
-//            vision_weight_ = 0;
-//        }
-//   }
-//    return vision_weight_;
 }
 
 
 double Particle::likelihood(LikelihoodFieldMap *map, Scan &scan)
 {
 	uint16_t t = p_.get16bitRepresentation();
-	double lidar_x = p_.x_ + scan.lidar_pose_x_*Mcl::cos_[t] 
-				- scan.lidar_pose_y_*Mcl::sin_[t];
-	double lidar_y = p_.y_ + scan.lidar_pose_x_*Mcl::sin_[t] 
-				+ scan.lidar_pose_y_*Mcl::cos_[t];
-	uint16_t lidar_yaw = Pose::get16bitRepresentation(scan.lidar_pose_yaw_);
+    double ans = 0.0;
+    if(map->isOccupied(p_.x_,p_.y_)){
+        ans = 0.0;
+    }
+    else{
+        double lidar_x = p_.x_ + scan.lidar_pose_x_*Mcl::cos_[t]
+                    - scan.lidar_pose_y_*Mcl::sin_[t];
+        double lidar_y = p_.y_ + scan.lidar_pose_x_*Mcl::sin_[t]
+                    + scan.lidar_pose_y_*Mcl::cos_[t];
+        uint16_t lidar_yaw = Pose::get16bitRepresentation(scan.lidar_pose_yaw_);
 
-	double ans = 0.0;
-	for(int i=0;i<scan.ranges_.size();i+=scan.scan_increment_){
-		if(not scan.valid(scan.ranges_[i]))
-			continue;
-		uint16_t a = scan.directions_16bit_[i] + t + lidar_yaw;
-		double lx = lidar_x + scan.ranges_[i] * Mcl::cos_[a];
-		double ly = lidar_y + scan.ranges_[i] * Mcl::sin_[a];
 
-		ans += map->likelihood(lx, ly);
-	}
+        for(int i=0;i<scan.ranges_.size();i+=scan.scan_increment_){
+            if(not scan.valid(scan.ranges_[i]))
+                continue;
+            uint16_t a = scan.directions_16bit_[i] + t + lidar_yaw;
+            double lx = lidar_x + scan.ranges_[i] * Mcl::cos_[a];
+            double ly = lidar_y + scan.ranges_[i] * Mcl::sin_[a];
+
+            ans += map->likelihood(lx, ly);
+        }
+    }
 	return ans;
 }
 
