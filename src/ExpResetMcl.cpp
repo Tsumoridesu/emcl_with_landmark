@@ -71,10 +71,10 @@ void ExpResetMcl::sensorUpdate(double lidar_x, double lidar_y, double lidar_t, b
 	alpha_ = normalizeBelief()/valid_beams;
 	//alpha_ = nonPenetrationRate( particles_.size() / 20, map_.get(), scan); //new version
 	ROS_INFO("ALPHA: %f / %f", alpha_, alpha_threshold_);
+    ROS_INFO("particles size : %zu",particles_.size());
 	if(alpha_ < alpha_threshold_ and valid_pct > open_space_threshold_) {
         ROS_INFO("RESET");
-        if(particles_.size()<=1000)
-            vision_sensorReset(bbox, landmark_config, particles_);
+        vision_sensorReset(bbox, landmark_config, particles_);
         expansionReset();
         for (auto &p: particles_){
             p.w_ *= p.likelihood(map_.get(), scan);
@@ -84,6 +84,11 @@ void ExpResetMcl::sensorUpdate(double lidar_x, double lidar_y, double lidar_t, b
             }
         }
 	}
+    else{
+        if(particles_.size()>500){
+            particles_.pop_back();
+        }
+    }
 
 	if(normalizeBelief() > 0.000001)
 		resampling();
@@ -113,15 +118,26 @@ void ExpResetMcl::vision_sensorReset(yolov5_pytorch_ros::BoundingBoxes &bbox, YA
 
         for(auto observed_landmark : bbox.bounding_boxes){
             for(YAML::const_iterator l_ = landmark_config["landmark"][observed_landmark.Class].begin(); l_!= landmark_config["landmark"][observed_landmark.Class].end(); ++l_){
-                for(int i = 0; i<=1; i++){
-                    Pose p_;
-                    p_.x_ = l_->second["pose"][0].as<double>() + (double) rand() / RAND_MAX * 15;
-                    p_.y_ = l_->second["pose"][1].as<double>() + (double) rand() / RAND_MAX * 15;
-                    p_.t_ = 2*M_PI*rand()/RAND_MAX - M_PI;
-                    Particle P(p_.x_, p_.y_, p_.t_, 0);
-                    result.push_back(P);
+                if(result.size()<=100000) {
+                    for (int i = 0; i <= 1; i++) {
+                        Pose p_;
+                        p_.x_ = l_->second["pose"][0].as<double>() + (double) rand() / RAND_MAX * 10;
+                        p_.y_ = l_->second["pose"][1].as<double>() + (double) rand() / RAND_MAX * 10;
+                        p_.t_ = 2 * M_PI * rand() / RAND_MAX - M_PI;
+                        Particle P(p_.x_, p_.y_, p_.t_, 0);
+                        result.push_back(P);
+                    }
                 }
-
+                else{
+                    for(auto r:result){
+                        Pose p_;
+                        p_.x_ = l_->second["pose"][0].as<double>() + (double) rand() / RAND_MAX * 10;
+                        p_.y_ = l_->second["pose"][1].as<double>() + (double) rand() / RAND_MAX * 10;
+                        p_.t_ = 2 * M_PI * rand() / RAND_MAX - M_PI;
+                        Particle P(p_.x_, p_.y_, p_.t_, 0);
+                        r = P;
+                    }
+                }
             }
 //            auto l_ = landmark_config["landmark"][observed_landmark.Class][rand() %
 //                                                            (landmark_config["landmark"][observed_landmark.Class].size() - 1)];

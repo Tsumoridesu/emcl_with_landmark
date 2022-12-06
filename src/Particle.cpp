@@ -42,7 +42,7 @@ double Particle::vision_weight(yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::No
 //            }
 
         }
-        auto weigth = cos(theta_best)+1;
+        auto weigth = cos(theta_best) + 1;
         vision_weight_ += weigth;
     }
     if(bbox.bounding_boxes.size() != 0){
