@@ -73,8 +73,9 @@ void ExpResetMcl::sensorUpdate(double lidar_x, double lidar_y, double lidar_t, b
 	ROS_INFO("ALPHA: %f / %f", alpha_, alpha_threshold_);
 	if(alpha_ < alpha_threshold_ and valid_pct > open_space_threshold_) {
         ROS_INFO("RESET");
+        if(particles_.size()<=1000)
+            vision_sensorReset(bbox, landmark_config, particles_);
         expansionReset();
-//        vision_sensorReset(bbox, landmark_config);
         for (auto &p: particles_){
             p.w_ *= p.likelihood(map_.get(), scan);
             auto w_v = p.vision_weight(bbox, landmark_config);
@@ -106,8 +107,29 @@ void ExpResetMcl::expansionReset(void)
 }
 
 
-//void ExpResetMcl::vision_sensorReset(yolov5_pytorch_ros::BoundingBoxes &bbox, YAML::Node &landmark_config) {
-//    if (bbox.bounding_boxes.size() != 0) {
+void ExpResetMcl::vision_sensorReset(yolov5_pytorch_ros::BoundingBoxes &bbox, YAML::Node &landmark_config,std::vector<Particle> &result) {
+    srand((unsigned)time(NULL));
+    if (bbox.bounding_boxes.size() != 0) {
+
+        for(auto observed_landmark : bbox.bounding_boxes){
+            for(YAML::const_iterator l_ = landmark_config["landmark"][observed_landmark.Class].begin(); l_!= landmark_config["landmark"][observed_landmark.Class].end(); ++l_){
+                for(int i = 0; i<=1; i++){
+                    Pose p_;
+                    p_.x_ = l_->second["pose"][0].as<double>() + (double) rand() / RAND_MAX * 15;
+                    p_.y_ = l_->second["pose"][1].as<double>() + (double) rand() / RAND_MAX * 15;
+                    p_.t_ = 2*M_PI*rand()/RAND_MAX - M_PI;
+                    Particle P(p_.x_, p_.y_, p_.t_, 0);
+                    result.push_back(P);
+                }
+
+            }
+//            auto l_ = landmark_config["landmark"][observed_landmark.Class][rand() %
+//                                                            (landmark_config["landmark"][observed_landmark.Class].size() - 1)];
+
+
+        }
+
+
 //        for (auto &p: particles_) {
 //            if ((double) rand() / RAND_MAX < 0.1) {
 //                auto b_ = bbox.bounding_boxes[rand() % (bbox.bounding_boxes.size() - 1)];
@@ -119,6 +141,6 @@ void ExpResetMcl::expansionReset(void)
 //                p.w_ = 1.0 / particles_.size();
 //                }
 //            }
-//        }
-//    }
+        }
+    }
 }
