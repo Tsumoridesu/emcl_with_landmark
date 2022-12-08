@@ -118,7 +118,6 @@ void ExpResetMcl::vision_sensorReset(yolov5_pytorch_ros::BoundingBoxes &bbox, YA
 
         for(auto observed_landmark : bbox.bounding_boxes){
             for(YAML::const_iterator l_ = landmark_config["landmark"][observed_landmark.Class].begin(); l_!= landmark_config["landmark"][observed_landmark.Class].end(); ++l_){
-                if(result.size()<=100000) {
                     for (int i = 0; i <= 1; i++) {
                         Pose p_;
                         p_.x_ = l_->second["pose"][0].as<double>() + (double) rand() / RAND_MAX * 10;
@@ -126,37 +125,20 @@ void ExpResetMcl::vision_sensorReset(yolov5_pytorch_ros::BoundingBoxes &bbox, YA
                         p_.t_ = 2 * M_PI * rand() / RAND_MAX - M_PI;
                         Particle P(p_.x_, p_.y_, p_.t_, 0);
                         result.push_back(P);
+                        result.erase(result.begin());
                     }
-                }
-                else{
-                    for(auto r:result){
-                        Pose p_;
-                        p_.x_ = l_->second["pose"][0].as<double>() + (double) rand() / RAND_MAX * 10;
-                        p_.y_ = l_->second["pose"][1].as<double>() + (double) rand() / RAND_MAX * 10;
-                        p_.t_ = 2 * M_PI * rand() / RAND_MAX - M_PI;
-                        Particle P(p_.x_, p_.y_, p_.t_, 0);
-                        r = P;
-                    }
-                }
-            }
-//            auto l_ = landmark_config["landmark"][observed_landmark.Class][rand() %
-//                                                            (landmark_config["landmark"][observed_landmark.Class].size() - 1)];
-
-
-        }
-
-
-//        for (auto &p: particles_) {
-//            if ((double) rand() / RAND_MAX < 0.1) {
-//                auto b_ = bbox.bounding_boxes[rand() % (bbox.bounding_boxes.size() - 1)];
-//                auto l_ = landmark_config["landmark"][b_.Class][rand() %
-//                                                                (landmark_config["landmark"][b_.Class].size() - 1)];
-//                p.p_.x_ = l_["x"].as<double>() + (double) rand() / RAND_MAX * 5;
-//                p.p_.y_ = l_["y"].as<double>() + (double) rand() / RAND_MAX * 5;
-//                p.p_.t_ = (double) rand() / RAND_MAX * 2 * M_PI;
-//                p.w_ = 1.0 / particles_.size();
+//                else{
+//                    for(auto r:result){
+//                        Pose p_;
+//                        p_.x_ = l_->second["pose"][0].as<double>() + (double) rand() / RAND_MAX * 10;
+//                        p_.y_ = l_->second["pose"][1].as<double>() + (double) rand() / RAND_MAX * 10;
+//                        p_.t_ = 2 * M_PI * rand() / RAND_MAX - M_PI;
+//                        Particle P(p_.x_, p_.y_, p_.t_, 0);
+//                        r = P;
+//                    }
 //                }
-//            }
+            }
         }
     }
+}
 }

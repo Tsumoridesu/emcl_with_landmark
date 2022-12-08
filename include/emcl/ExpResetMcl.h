@@ -21,7 +21,7 @@ public:
 	~ExpResetMcl();
 
 	void sensorUpdate(double lidar_x, double lidar_y, double lidar_t, bool inv, yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::Node& landmark_config);
-//    void vision_sensorReset(yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::Node& landmark_config);
+    void vision_sensorReset(yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::Node& landmark_config, std::vector<Particle> &result);
 private:
 	double alpha_threshold_;
 	double open_space_threshold_;
