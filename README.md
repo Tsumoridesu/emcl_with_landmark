@@ -29,7 +29,7 @@ $w_{vision} = cos(\varphi_{err})+A$
 $w = w_{vision} \cdot w_{LiDAR}$
 
 ### リセットの％
-$ratio = \frac{detected objects number \cdot detected object class \cdot B} {particles number}$
+$ratio = \frac{N_{detect} \cdot N_{detect in class} \cdot B} {N_{paritcle}}$
 ## 追加のパラメータ
 ```landmark_file_path```: ランドマーク情報ファイル([サンプル](https://github.com/Tsumoridesu/emcl_with_landmark/blob/main/landmark_list.yaml))のパス 
 
