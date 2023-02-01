@@ -27,7 +27,7 @@ ExpResetMcl::~ExpResetMcl()
 {
 }
 
-void ExpResetMcl::sensorUpdate(double lidar_x, double lidar_y, double lidar_t, bool inv, yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::Node& landmark_config)
+void ExpResetMcl::sensorUpdate(double lidar_x, double lidar_y, double lidar_t, bool inv, yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::Node& landmark_config, double phi_th, double R_th, double A, int B,double w_img)
 {
 	if(processed_seq_ == scan_.seq_)
 		return;
@@ -74,11 +74,11 @@ void ExpResetMcl::sensorUpdate(double lidar_x, double lidar_y, double lidar_t, b
     ROS_INFO("particles size : %zu",particles_.size());
 	if(alpha_ < alpha_threshold_ and valid_pct > open_space_threshold_) {
         ROS_INFO("RESET");
-        vision_sensorReset(bbox, landmark_config, particles_);
+        vision_sensorReset(bbox, landmark_config, particles_, R_th, B);
         expansionReset();
         for (auto &p: particles_){
             p.w_ *= p.likelihood(map_.get(), scan);
-            auto w_v = p.vision_weight(bbox, landmark_config);
+            auto w_v = p.vision_weight(bbox, landmark_config, phi_th, R_th, A, w_img);
             if(bbox.bounding_boxes.size() > 0){
                 p.w_ *= w_v;
             }
@@ -112,31 +112,20 @@ void ExpResetMcl::expansionReset(void)
 }
 
 
-void ExpResetMcl::vision_sensorReset(yolov5_pytorch_ros::BoundingBoxes &bbox, YAML::Node &landmark_config,std::vector<Particle> &result) {
+void ExpResetMcl::vision_sensorReset(yolov5_pytorch_ros::BoundingBoxes &bbox, YAML::Node &landmark_config,std::vector<Particle> &result, double R_th ,int B) {
     srand((unsigned)time(NULL));
     if (bbox.bounding_boxes.size() != 0) {
-
         for(auto observed_landmark : bbox.bounding_boxes){
             for(YAML::const_iterator l_ = landmark_config["landmark"][observed_landmark.Class].begin(); l_!= landmark_config["landmark"][observed_landmark.Class].end(); ++l_){
-                    for (int i = 0; i <= 1; i++) {
-                        Pose p_;
-                        p_.x_ = l_->second["pose"][0].as<double>() + (double) rand() / RAND_MAX * 10;
-                        p_.y_ = l_->second["pose"][1].as<double>() + (double) rand() / RAND_MAX * 10;
-                        p_.t_ = 2 * M_PI * rand() / RAND_MAX - M_PI;
-                        Particle P(p_.x_, p_.y_, p_.t_, 0);
-                        result.push_back(P);
-                        result.erase(result.begin());
-                    }
-//                else{
-//                    for(auto r:result){
-//                        Pose p_;
-//                        p_.x_ = l_->second["pose"][0].as<double>() + (double) rand() / RAND_MAX * 10;
-//                        p_.y_ = l_->second["pose"][1].as<double>() + (double) rand() / RAND_MAX * 10;
-//                        p_.t_ = 2 * M_PI * rand() / RAND_MAX - M_PI;
-//                        Particle P(p_.x_, p_.y_, p_.t_, 0);
-//                        r = P;
-//                    }
-//                }
+                for (int i = 0; i <= B; i++) {
+                    Pose p_;
+                    p_.x_ = l_->second["pose"][0].as<double>() + (double) rand() / RAND_MAX * R_th;
+                    p_.y_ = l_->second["pose"][1].as<double>() + (double) rand() / RAND_MAX * R_th;
+                    p_.t_ = 2 * M_PI * rand() / RAND_MAX - M_PI;
+                    Particle P(p_.x_, p_.y_, p_.t_, 0);
+                    result.push_back(P);
+                    result.erase(result.begin());
+                }
             }
         }
     }

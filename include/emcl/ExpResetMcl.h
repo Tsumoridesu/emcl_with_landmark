@@ -20,8 +20,8 @@ public:
 			double expansion_radius_position, double expansion_radius_orientation);
 	~ExpResetMcl();
 
-	void sensorUpdate(double lidar_x, double lidar_y, double lidar_t, bool inv, yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::Node& landmark_config);
-    void vision_sensorReset(yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::Node& landmark_config, std::vector<Particle> &result);
+	void sensorUpdate(double lidar_x, double lidar_y, double lidar_t, bool inv, yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::Node& landmark_config, double phi_th, double R_th, double A, int B,double w_img);
+    void vision_sensorReset(yolov5_pytorch_ros::BoundingBoxes& bbox, YAML::Node& landmark_config, std::vector<Particle> &result,double R_th,int B);
 private:
 	double alpha_threshold_;
 	double open_space_threshold_;

@@ -58,7 +58,10 @@ private:
 	bool simple_reset_request_;
 	double init_x_, init_y_, init_t_;
 
+
     yolov5_pytorch_ros::BoundingBoxes bbox_;
+    double phi_th_, R_th_, A_, w_img_;
+    int B_;
     YAML::Node landmark_config_;
 	void publishPose(double x, double y, double t,
 			double x_dev, double y_dev, double t_dev,

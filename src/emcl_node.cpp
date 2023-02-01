@@ -43,6 +43,12 @@ void EMclNode::initCommunication(void)
 	private_nh_.param("base_frame_id", base_frame_id_, std::string("base_link"));
 
     private_nh_.param("landmark_file_path", landmark_file_path_, std::string("../landmarks.yaml"));
+    private_nh_.param("phi_th", phi_th_, 0.26);
+    private_nh_.param("R_th", R_th_, 20.0);
+    private_nh_.param("A", A_, 0.99);
+    private_nh_.param("B", B_, 1);
+    private_nh_.param("ImageWide", w_img_, 1280.0);
+
 
     landmark_config_ = YAML::LoadFile(landmark_file_path_);
 	tfb_.reset(new tf2_ros::TransformBroadcaster());
@@ -125,6 +131,10 @@ void EMclNode::initialPoseReceived(const geometry_msgs::PoseWithCovarianceStampe
 
 void EMclNode::yoloReceived(const yolov5_pytorch_ros::BoundingBoxes &msg)
 {
+//    msg.bounding_boxes.
+//    for (auto &bbox : msg.bounding_boxes){
+//        double yaw = float(-(((bbox.xmin + bbox.xmax) / 2) - w_img_/2) / w_img_/2 * M_PI);
+//    }
     bbox_= msg;
 
 }
@@ -158,7 +168,7 @@ void EMclNode::loop(void)
 	struct timespec ts_start, ts_end;
 	clock_gettime(CLOCK_REALTIME, &ts_start);
 	*/
-	pf_->sensorUpdate(lx, ly, lt, inv, bbox_,landmark_config_);
+	pf_->sensorUpdate(lx, ly, lt, inv, bbox_,landmark_config_,phi_th_,R_th_,A_,B_,w_img_);
 	/*
 	clock_gettime(CLOCK_REALTIME, &ts_end);
 	struct tm tm;
