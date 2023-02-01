@@ -26,15 +26,15 @@ https://github.com/open-rdc/orne_navigation
 ランドマークが検出された場合だけ
 ### 視覚重みの計算式
 <p align="center">
-$w_{vision} = cos(\varphi_{err})+A$ 
+<font size="6">$w_{vision} = cos(\varphi_{err})+A$ </font>
 </p>
 <p align="center">
-$w = w_{vision} \cdot w_{LiDAR}$
+<font size="6">$w = w_{vision} \cdot w_{LiDAR}$ </font>
 </p>
 
 ### リセットの％
 <p align="center">
-$ratio = \frac{N_{detect} \cdot N_{detect in class} \cdot B} {N_{paritcle}}$
+<font size="6">$ratio = \frac{N_{detect} \cdot N_{detect in class} \cdot B} {N_{paritcle}}$</font>
 </p>
 
 ## 追加のパラメータ
