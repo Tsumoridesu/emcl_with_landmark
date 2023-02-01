@@ -6,4 +6,4 @@
 
 ## 全体の構造図
 
-<img alt="system" height="1080" src="https://github.com/Tsumoridesu/emcl_with_landmark/blob/main/system.drawio.png" width="1920"/>
+![system](https://github.com/Tsumoridesu/emcl_with_landmark/blob/main/system.drawio.png)
