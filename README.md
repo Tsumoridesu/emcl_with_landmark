@@ -1,6 +1,6 @@
 # emcl_with_landmark: emclが視覚から検出のランドマークを使用
 
-このリポジトリはemcl(https://github.com/ryuichiueda/emcl)の機能を拡張したものです。
+このリポジトリは[emcl](https://github.com/ryuichiueda/emcl)の機能を拡張したものです。
 カメラから検出されたランドマークを使用し，視覚重みを計算することで，2D LiDARの重みと一緒に計算する．
 ランドマーク未検出の場合，元のemclと同じ動作をする．
 
@@ -25,11 +25,18 @@ https://github.com/open-rdc/orne_navigation
 ## 重要な式
 ランドマークが検出された場合だけ
 ### 視覚重みの計算式
-$w_{vision} = cos(\varphi_{err})+A$  
+<p align="center">
+$w_{vision} = cos(\varphi_{err})+A$ 
+</p>
+<p align="center">
 $w = w_{vision} \cdot w_{LiDAR}$
+</p>
 
 ### リセットの％
+<p align="center">
 $ratio = \frac{N_{detect} \cdot N_{detect in class} \cdot B} {N_{paritcle}}$
+</p>
+
 ## 追加のパラメータ
 ```landmark_file_path```: ランドマーク情報ファイル([サンプル](https://github.com/Tsumoridesu/emcl_with_landmark/blob/main/landmark_list.yaml))のパス 
 
