@@ -1,6 +1,6 @@
-# emcl_with_landmark: emclが視覚から検出のランドマークを使用
+# emcl_with_landmark: emclが視覚から検出したランドマークを使用
 
-このリポジトリは[emcl](https://github.com/ryuichiueda/emcl)の機能を拡張したものです。
+このリポジトリは[emcl](https://github.com/ryuichiueda/emcl)の機能を拡張したものである．
 カメラから検出されたランドマークを使用し，視覚重みを計算することで，2D LiDARの重みと一緒に計算する．
 ランドマーク未検出の場合，元のemclと同じ動作をする．
 
@@ -8,7 +8,7 @@
 
 ![system](https://github.com/Tsumoridesu/emcl_with_landmark/blob/main/system.drawio.png)
 
-## 依存のパケージ
+## 依存のパッケージ
 
 ### theta_simple_stitching  (全天球カメラ用)
 branch: melodic-devel  
@@ -22,8 +22,14 @@ https://github.com/open-rdc/yolov5_pytorch_ros
 branch: refactor/noetic-devel  
 https://github.com/open-rdc/orne_navigation
 
+
+## インストールについて
+Ubuntu 20.04 LTSにROS Noeticをインストールした環境を用意してください．
+下記のwikiにemcl_with_landmarkのインストールについてまとめました．
+- [インストールについて](https://github.com/hellocit/emcl_with_landmark/wiki/emcl_with_landmark%E3%81%AE%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6)
+
 ## 重要な式
-ランドマークが検出された場合だけ
+ランドマークが検出された場合，下記の式を計算に用いる．
 ### 視覚重みの計算式
 <p align="center">
 <font size="16">$w_{vision} = cos(\varphi_{err})+A$ </font>
@@ -40,16 +46,16 @@ https://github.com/open-rdc/orne_navigation
 ## 追加のパラメータ
 ```landmark_file_path```: ランドマーク情報ファイル([サンプル](https://github.com/Tsumoridesu/emcl_with_landmark/blob/main/landmark_list.yaml))のパス 
 
-```phi_th```:検出誤差の閾値($\varphi_{err}$がこれを超えたら重みをゼロにする)  
+```phi_th```:検出誤差の閾値($\varphi_{err}$がこれを超えたら重みがゼロになる)
 
 ```R_th```:検出距離の閾値(この距離を超えるランドマークが重みの計算を参加しない & リセットの半径)
 
-```A```: 視覚重みの計算式の係数(大き場合，視覚重みが大きくなる)
+```A```: 視覚重みの計算式の係数(大きい場合，視覚重みが大きくなる)
 
 ```B```: リセットの％の計算式の係数(一回のリセットとして取り出すパーティクルの量)
 
 ### 追加のsubscribe topic
-```detected_objects_in_image```:yoloからpublishされる検出されたオブジェクトの情報
+```detected_objects_in_image```:yoloがpublishした検出されたオブジェクトの情報
 
 ## ランドマーク情報ファイルの書き方
 ```yaml
@@ -67,4 +73,4 @@ landmark:
 ```
 
 ## TODO
-一部のパラメータはまだテストされない．
+一部のパラメータはまだテストされていない．
