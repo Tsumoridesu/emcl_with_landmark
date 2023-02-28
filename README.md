@@ -1,4 +1,4 @@
-# emcl_with_landmark: emclが視覚から検出のランドマークを使用
+# emcl_with_landmark: emclが視覚から検出したランドマークを使用
 
 このリポジトリは[emcl](https://github.com/ryuichiueda/emcl)の機能を拡張したものである．
 カメラから検出されたランドマークを使用し，視覚重みを計算することで，2D LiDARの重みと一緒に計算する．
@@ -22,8 +22,13 @@ https://github.com/open-rdc/yolov5_pytorch_ros
 branch: refactor/noetic-devel  
 https://github.com/open-rdc/orne_navigation
 
+
+## インストールについて
+Ubuntu 20.04 LTSにROS Noeticをインストールした環境を用意してください．
+* wikiへのURL
+
 ## 重要な式
-ランドマークが検出された場合だけ
+ランドマークが検出された場合，下記の式を計算に用いる．
 ### 視覚重みの計算式
 <p align="center">
 <font size="16">$w_{vision} = cos(\varphi_{err})+A$ </font>
@@ -49,7 +54,7 @@ https://github.com/open-rdc/orne_navigation
 ```B```: リセットの％の計算式の係数(一回のリセットとして取り出すパーティクルの量)
 
 ### 追加のsubscribe topic
-```detected_objects_in_image```:yoloからpublishされる検出されたオブジェクトの情報
+```detected_objects_in_image```:yoloがpublishした検出されたオブジェクトの情報
 
 ## ランドマーク情報ファイルの書き方
 ```yaml
