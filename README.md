@@ -40,7 +40,7 @@ https://github.com/open-rdc/orne_navigation
 ## 追加のパラメータ
 ```landmark_file_path```: ランドマーク情報ファイル([サンプル](https://github.com/Tsumoridesu/emcl_with_landmark/blob/main/landmark_list.yaml))のパス 
 
-```phi_th```:検出誤差の閾値($\varphi_{err}$がこれを超えたら重みをゼロになる)
+```phi_th```:検出誤差の閾値($\varphi_{err}$がこれを超えたら重みがゼロになる)
 
 ```R_th```:検出距離の閾値(この距離を超えるランドマークが重みの計算を参加しない & リセットの半径)
 
