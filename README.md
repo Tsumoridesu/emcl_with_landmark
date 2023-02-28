@@ -25,7 +25,7 @@ https://github.com/open-rdc/orne_navigation
 
 ## インストールについて
 Ubuntu 20.04 LTSにROS Noeticをインストールした環境を用意してください．
-* wikiへのURL
+- [インストールについて](https://github.com/hellocit/emcl_with_landmark/wiki/emcl_with_landmark%E3%81%AE%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6)
 
 ## 重要な式
 ランドマークが検出された場合，下記の式を計算に用いる．
